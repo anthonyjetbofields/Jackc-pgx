@@ -5,11 +5,12 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	realpgxpool "github.com/jackc/pgx/v5/pgxpool"
 )
 
 type connTx struct {
 	tx   pgx.Tx
-	conn *Conn
+	conn *realpgxpool.Conn
 }
 
 func (ct *connTx) Begin(ctx context.Context) (pgx.Tx, error) {
@@ -34,7 +35,8 @@ func (ct *connTx) Rollback(ctx context.Context) error {
 
 	err := ct.tx.Rollback(ctx)
 	if err != nil {
-		ct.conn.Destroy()
+		ct.conn.Conn().Close(context.Background())
+		ct.conn.Release()
 		ct.conn = nil
 		return err
 	}

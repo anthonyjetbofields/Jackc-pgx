@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,6 +17,10 @@ func TestTxCommit(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
+
+	if os.Getenv("PGX_TEST_DATABASE") == "" {
+		t.Skip("Skipping test because PGX_TEST_DATABASE is not set")
+	}
 
 	pool, err := pgxpool.New(ctx, os.Getenv("PGX_TEST_DATABASE"))
 	require.NoError(t, err)
@@ -46,6 +51,10 @@ func TestTxRollback(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
+	if os.Getenv("PGX_TEST_DATABASE") == "" {
+		t.Skip("Skipping test because PGX_TEST_DATABASE is not set")
+	}
+
 	pool, err := pgxpool.New(ctx, os.Getenv("PGX_TEST_DATABASE"))
 	require.NoError(t, err)
 	defer pool.Close()
@@ -74,6 +83,10 @@ func TestTxRollbackFailureDestroy(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	if os.Getenv("PGX_TEST_DATABASE") == "" {
+		t.Skip("Skipping test because PGX_TEST_DATABASE is not set")
+	}
 
 	config, err := pgxpool.ParseConfig(os.Getenv("PGX_TEST_DATABASE"))
 	require.NoError(t, err)
